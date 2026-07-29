@@ -1,7 +1,5 @@
 # Motivation & Project Background
-# Motivation & Project Background
 
-## Discovering Y/N
 ## Discovering Y/N
 
 I first stumbled upon **Y/N** while browsing [Work at a Startup](https://www.workatastartup.com/). Intrigued by the concept of interactive fiction, I downloaded the app, and was instantly hooked. Within just two weeks, I spent **over 40 hours** on the platform. It stands out because it allows me to step directly into my favorite screenplays, interact with iconic characters, and co-write stories in real time.
