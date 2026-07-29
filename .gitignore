@@ -1,0 +1,5 @@
+.env
+*.db
+saves.json
+__pycache__/
+".env" 

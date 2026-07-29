@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Y/N Visual Novel</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #111; margin: 0; display: flex; justify-content: center; height: 100vh; }
+        #app-container { width: 100%; max-width: 450px; background-color: #000; display: flex; flex-direction: column; height: 100%; border-left: 1px solid #333; border-right: 1px solid #333; }
+        
+        /* Header */
+        #header { background-color: #222; padding: 15px; text-align: center; color: #fff; font-weight: bold; border-bottom: 1px solid #333; font-size: 1.1em;}
+        #header span { color: #888; font-size: 0.8em; font-weight: normal; display: block; margin-top: 2px;}
+
+        /* Chat Area */
+        #chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Message Layouts */
+        .msg-row { display: flex; gap: 10px; align-items: flex-end; }
+        .msg-row.user { justify-content: flex-end; }
+        
+        .avatar { width: 35px; height: 35px; border-radius: 50%; background-color: #555; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: white; flex-shrink: 0; }
+        
+        .msg-content { display: flex; flex-direction: column; max-width: 75%; }
+        .user .msg-content { align-items: flex-end; }
+        
+        .sender-name { font-size: 11px; color: #888; margin-bottom: 4px; margin-left: 2px; }
+        
+        .bubble { padding: 10px 14px; border-radius: 20px; font-size: 15px; line-height: 1.4; color: white; word-wrap: break-word; }
+        
+        /* Bubble Colors */
+        .bubble.user-bubble { background-color: #0B93F6; border-bottom-right-radius: 4px; }
+        .bubble.npc-bubble { background-color: #262628; border-bottom-left-radius: 4px; }
+        
+        /* Commentary / System Messages */
+        .system-msg { text-align: center; margin: 10px 0; font-size: 13px; color: #aaa; font-style: italic; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; line-height: 1.4; }
+
+        /* Input Area */
+        #input-area { padding: 10px 15px 20px 15px; background-color: #111; display: flex; gap: 10px; border-top: 1px solid #333; }
+        input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #333; background: #222; color: white; outline: none; font-size: 15px; }
+        button { padding: 0 20px; border-radius: 25px; border: none; background: #0B93F6; color: white; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="header">
+        Story Mode 📖
+        <span>Alex, Vamp, Hunter</span>
+    </div>
+    <div id="chat-box">
+        <div class="system-msg">Narrator: You are standing in a dusty library holding a flickering flashlight. Companions Vamp and Hunter are with you.</div>
+    </div>
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="What do you do?" onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const userId = "player_1"; 
+    const chatBox = document.getElementById("chat-box");
+    const inputField = document.getElementById("user-input");
+
+    function handleKeyPress(event) {
+        if (event.key === "Enter") sendMessage();
+    }
+
+    function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+        return `hsl(${hash % 360}, 60%, 40%)`;
+    }
+
+    function appendUserMessage(text) {
+        const html = `
+            <div class="msg-row user">
+                <div class="msg-content">
+                    <div class="bubble user-bubble">${text}</div>
+                </div>
+            </div>`;
+        chatBox.insertAdjacentHTML("beforeend", html);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function appendNPCMessage(name, text) {
+        if (name.toLowerCase().includes("narrator") || name.toLowerCase().includes("system")) {
+            chatBox.insertAdjacentHTML("beforeend", `<div class="system-msg"><b>${name}:</b> ${text}</div>`);
+            return;
+        }
+        
+        const initial = name.charAt(0).toUpperCase();
+        const color = stringToColor(name);
+        const html = `
+            <div class="msg-row npc">
+                <div class="avatar" style="background-color: ${color}">${initial}</div>
+                <div class="msg-content">
+                    <div class="sender-name">${name}</div>
+                    <div class="bubble npc-bubble">${text}</div>
+                </div>
+            </div>`;
+        chatBox.insertAdjacentHTML("beforeend", html);
+    }
+
+    async function sendMessage() {
+        const text = inputField.value.trim();
+        if (!text) return;
+
+        appendUserMessage(text);
+        inputField.value = "";
+
+        const typingId = "typing-" + Date.now();
+        chatBox.insertAdjacentHTML("beforeend", `<div id="${typingId}" class="system-msg">Characters are reacting...</div>`);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch(`/chat?user_id=${userId}&user_input=${encodeURIComponent(text)}`, { method: "POST" });
+            const data = await response.json();
+            
+            document.getElementById(typingId).remove();
+
+            const lines = data.reply.split('\n').filter(line => line.trim() !== '');
+            for (let line of lines) {
+                const match = line.match(/^([^:]+):\s*(.*)/);
+                if (match) {
+                    appendNPCMessage(match[1].trim(), match[2].trim());
+                } else {
+                    appendNPCMessage("Narrator", line.trim());
+                }
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (error) {
+            document.getElementById(typingId).remove();
+            chatBox.insertAdjacentHTML("beforeend", `<div class="system-msg" style="color: red;">Connection error.</div>`);
+        }
+    }
+</script>
+
+</body>
+</html>
