@@ -1,8 +1,8 @@
-# 💡 Motivation & Project Background
+# Motivation & Project Background
 
-## 🎮 The Spark: Discovering Y/N
+## Discovering Y/N
 
-I first stumbled upon **Y/N** while browsing [Work at a Startup](https://www.workatastartup.com/). Intrigued by the concept of dynamic interactive fiction, I downloaded the app—and was instantly hooked. Within just two weeks, I logged **over 40 hours** on the platform.
+I first stumbled upon **Y/N** while browsing [Work at a Startup](https://www.workatastartup.com/). Intrigued by the concept of dynamic interactive fiction, I downloaded the app, and was instantly hooked. Within just two weeks, I logged **over 40 hours** on the platform.
 
 ### Why Y/N Stands Out
 What makes Y/N so incredibly addictive and unique is its core UX philosophy: **unmatched user autonomy and creative freedom**. It allows users to step directly into their favorite screenplays, interact with iconic characters, and co-write stories in real time.
