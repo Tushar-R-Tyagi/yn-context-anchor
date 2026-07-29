@@ -13,6 +13,7 @@ def init_db():
             user_id TEXT PRIMARY KEY,
             context_json TEXT NOT NULL,
             story_summary TEXT DEFAULT '',
+            summarized_count INTEGER DEFAULT 0,
             is_busy INTEGER DEFAULT 0
         )
     """)
@@ -48,7 +49,7 @@ def get_or_create_user(user_id: str):
         is_busy = bool(row[2])
     else:
         context = StoryContext(
-            user_profile=UserProfile(first_name="Alex", last_name="Rider", persona_traits=["brave", "observant"]),
+            user_profile=UserProfile(first_name="Alex", last_name="Rider", pronouns="they/them", persona_traits=["brave", "observant"]),
             world_state=WorldState(location="dusty library", active_inventory=["flickering flashlight"])
         )
         summary = "The story begins in a dusty library."
@@ -69,6 +70,25 @@ def update_summary(user_id: str, new_summary: str):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET story_summary = ? WHERE user_id = ?", (new_summary, user_id))
+    conn.commit()
+    conn.close()
+
+def get_summarization_state(user_id: str):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT story_summary, summarized_count FROM users WHERE user_id = ?", (user_id,))
+    summary, summarized_count = cursor.fetchone()
+
+    cursor.execute("SELECT role, content FROM history WHERE user_id = ? ORDER BY id ASC", (user_id,))
+    history = [{"role": r[0], "content": r[1]} for r in cursor.fetchall()]
+
+    conn.close()
+    return summary, history, summarized_count
+
+def set_summarized_count(user_id: str, count: int):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET summarized_count = ? WHERE user_id = ?", (count, user_id))
     conn.commit()
     conn.close()
 

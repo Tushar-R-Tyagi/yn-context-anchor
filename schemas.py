@@ -4,6 +4,7 @@ from typing import List
 class UserProfile(BaseModel):
     first_name: str
     last_name: str
+    pronouns: str
     persona_traits: List[str]
 
 class WorldState(BaseModel):

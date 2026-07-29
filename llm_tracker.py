@@ -26,7 +26,7 @@ def update_story_state(context: StoryContext, recent_text: str):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"LATEST STORY EVENT: {recent_text}"}
