@@ -57,6 +57,3 @@ uvicorn main:app --reload
 ```
 
 and open `http://127.0.0.1:8000`.
-
-A few honest caveats since this is a prototype and not a pitch deck: it's single-user right now (everything is keyed to one `user_id`), there's no auth, and SQLite is fine for a demo but obviously isn't what you'd reach for at real scale. The auditor and summarizer calls do add a bit of cost and latency on top of the base story generation, though using a cheaper model for both of those (they're just structured extraction, not creative writing) keeps that overhead small.
-
